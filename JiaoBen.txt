@@ -1,0 +1,634 @@
+SetRowsNumber(0)
+//注意：每次制作完字库后，需要自行把制作的字库文件添加到脚本“附件”中
+TracePrint SetDictEx(0, "Attachment:英雄.txt")
+TracePrint SetDictEx(1, "Attachment:sz.txt")
+TracePrint SetDictEx(2, "Attachment:其他.txt")
+
+Dim intX, intY
+Dim i
+
+Dim 当前关卡数
+Dim 祈愿模式
+当前关卡数 = 0
+祈愿模式 = 0
+
+Function 获取坐标(a, b,操作类型)
+    Dim aa,bb
+    Dim i,j
+    For i = 0 To 2
+        For j = 0 To 5
+        	
+            If i = a - 1 And j = b - 1 Then 
+                aa = 866 - (j * 130)
+                bb = 1016 + (i * 130)
+            
+                If i=a-1 And j=b-1 And 操作类型 = "按住" Then 
+                    TouchDown bb, aa,1
+
+                ElseIf 操作类型 = "移动" Then
+                    TouchMove bb, aa, 1, 500
+                    TouchUp 1
+                ElseIf 操作类型 = "点击" Then
+                    Tap bb, aa
+                    Delay 500
+                ElseIf 操作类型 = "副本" Then
+                    Delay 500
+                    Tap bb, aa
+                    Delay 1000
+                    Tap bb+48, aa+60
+                    Delay 500
+                ElseIf 操作类型 = "神话副本" Then
+                    Delay 500
+                    Tap bb, aa
+                    Delay 1000
+                    Tap bb+48, aa+26
+                    Delay 500
+                ElseIf 操作类型 = "卖出" Then
+                    Tap bb, aa
+                    Delay 300
+                    Tap bb - 120, aa
+                    Delay 100
+                    Tap bb - 120, aa
+                    Delay 100
+                    Tap bb - 120, aa
+                    Delay 100
+            
+                ElseIf 操作类型 = "登神" Then
+                    Delay 1000
+                    Tap bb, aa
+                    Delay 500
+
+                    FindColor 937,124,1368,958,"5CAA36",0,1.0,intX,intY
+                    If intX >-1 then
+                        Traceprint "找到"
+                        Tap intX,intY
+                        Delay 1000
+                    Else
+                        Traceprint "没有找到"
+                    End If
+
+                End If
+            End If
+
+        Next
+    Next
+	
+End Function
+
+Function 移动棋子(a1, b1, a2, b2)
+	
+    Delay 1000
+    获取坐标(a1, b1,"按住")
+    获取坐标 a2, b2, "移动"
+    Tap 690,115
+End Function
+
+Function 卖出英雄(a1, b1)
+	
+    Delay 1000
+    获取坐标 a1, b1, "卖出"
+    Tap 690,115
+End Function
+
+Function 检查开始联合战斗()
+    颜色数量 = GetColorNum(1260,553,1318,743, "DDBD30", 1.0)
+    Traceprint "颜色数量="&颜色数量
+    If 颜色数量 > 4800 Then 
+
+        Dim 是否相等
+        是否相等 = CmpColor(1852,160,"3872C9",1.0)
+        If 是否相等 > -1 Then
+            Tap 1852,160
+        Else
+            TracePrint "没有匹配的颜色"
+        End If
+
+        
+        Traceprint "开始新的对局"
+    Else 
+        颜色数量 = GetColorNum(1260,553,1318,743, "69483B", 1.0)
+        Traceprint "颜色数量2="&颜色数量
+        If 颜色数量 > 6200 Then
+            Tap 1278,655
+            Traceprint "选择困难模式"
+            Delay 5000
+        End If
+    End If
+End Function
+
+Function 检查是否结束()
+
+    颜色数量 = GetColorNum(1740,481,1816,594, "152794", 1.0)
+    Traceprint "颜色数量"&颜色数量
+    If 颜色数量 > 700 Then
+        Tap 1779,531
+        Traceprint "已经打完了"
+        Delay 5000
+    End If
+End Function
+
+//移动棋子(1,3,1,1)
+Function 常规检查EX()
+
+    UseDict(1)
+    当前关卡数=Clng(Ocr(83,501,119,544,"4C3B28",0.9))
+    Thread.SetShareVar "当前关卡数", 当前关卡数
+    UseDict (2)
+    //神话召唤
+    FindStr(280,884,752,936,"标记神话","49DAF4",0.9,intX,intY)
+    If intX >-1 then
+        Traceprint "召唤神话"
+        Tap IntX, IntY 
+    End If
+
+    FindStr(1535,958,1592,1036,"加速","FAEEEB",0.9,intX,intY)
+    If intX > -1 And intY > -1 Then
+        Traceprint "x2 加速"
+        Tap intX,intY
+    End If
+    
+    FindStr(618,68,657,177,"挑战","87F8BE",0.9,intX,intY)
+    If intX > -1 And intY > -1 Then
+        Traceprint "点击挑战"
+        Tap intX+80,intY + 50
+    End If
+    
+    颜色数量 = GetColorNum(1545, 473, 1680, 616, "FFFFFF", 1.0)
+    //Traceprint "颜色数量"&颜色数量
+    If 颜色数量 > 1500 Then
+    //FindStr(1545,473,1680,616,"阶段奖励","FFFFFF",0.9,intX,intY)
+    //If intX > -1 And intY > -1 Then
+        Dim intX,intY
+        FindColor 0,0,0,0,"1B75CE",0,1,intX,intY
+        If intX > -1 And intY > -1 Then
+            Tap intX, intY
+            Delay 500
+        End If
+        Traceprint "阶段奖励"
+        Tap 1357, 533
+        Delay 100
+    End If
+    If 当前关卡数 = null or 当前关卡数 = 0 Then 
+	      // 结束了
+        检查是否结束()
+        检查开始联合战斗()
+    End If
+	
+	
+	
+
+
+End Function
+
+Sub 循环检查()
+    While 1
+        Delay 1234
+        常规检查EX()
+    Wend
+	
+End Sub
+
+Thread.Start(循环检查)
+
+
+
+Dim 战场占位 = Array("","","","","","","","","","","","","","","","","","")
+Dim 副本火枪数 = 0
+
+Function 区域包含英雄()
+    Dim 区域包含
+    UseDict(0)
+    区域包含 = Ocr(230, 830, 280, 1021, "FFFFFF", 0.75)
+
+    If 区域包含 = "天使" Then
+        区域包含 = Ocr(236, 832, 353, 1012, "FFFFFF", 0.75)
+    End If
+    
+    If Len(区域包含) <> 0 Then 
+        区域包含英雄 = 区域包含
+    Else 
+        区域包含 = "NULL"
+    End If
+End Function
+
+Function 遍历战场()
+    Dim 战力值,位置英雄
+    战力值 = 0
+    For i = 0 To 2
+        For j = 0 To 5
+        	
+            位置英雄 = 战场占位(i * 6 + j)
+            If 位置英雄 = "大天使" and i=1 Then 
+            	
+                战力值 = 战力值 + 1
+            End If
+            If 位置英雄 = "恶霸"  and i=0 Then 
+            	
+                战力值 = 战力值 + 1 
+            End If
+            If 位置英雄 = "魔龙"  and i=2 Then 
+            	
+                战力值 = 战力值 + 0.35
+            End If
+            
+        Next
+    Next
+    
+    If 当前关卡数 > 40 Then 
+        副本火枪数=2
+    End If
+	
+    If 战力值 >= 2 and 副本火枪数>1 Then 
+        战场占位 = Array("","","","","","","","","","","","","","","","","","")
+        战场占位(6 + 0) = "大天使"
+        战场占位(6 + 1) = "大天使"
+        战场占位(6 + 2) = "大天使"
+        Exit Function
+    End If
+    Dim aa,bb,存在英雄
+    For i = 0 To 2
+        For j = 0 To 5
+            aa = 866 - (j * 123)
+            bb = 1016 + (i * 130)
+            Tap bb, aa
+            Delay 100
+            存在英雄 = 区域包含英雄()
+            Traceprint "遍历区域 "&i+1&j+1& " "&存在英雄
+            战场占位(i*6 + j) = 存在英雄
+        Next
+    Next
+
+End Function
+
+Function 现在应该干什么()
+	
+    Dim 是否存在爆破手,是否存在战士,是否存在企鹅,是否存在琴女,是否存在水滴,是否存在投手,是否存在牛头,战力值
+
+	//首先查看战场情况
+    是否存在爆破手 = 0
+    是否存在战士 = 0
+    是否存在牛头 = 0
+    是否存在琴女 = 0
+    是否存在企鹅 = 0
+    是否存在水滴 = 0
+    是否存在投手 = 0
+    战力值 = 0
+    Dim 位置英雄
+    For i = 0 To 2
+        For j = 0 To 5
+            位置英雄 = 战场占位(i * 6 + j)
+            
+            If 位置英雄 = "游侠" or 位置英雄 = "弓箭手" or 位置英雄 = "浮游炮" or 位置英雄 = "十字军" or 位置英雄 = "鬼武者" or 位置英雄 = "修女"  or 位置英雄 = "毁灭装置" or 位置英雄 = "老头" or 位置英雄 = "时空" Then 
+            	
+                //Delay 600
+                Traceprint "卖出"& 位置英雄
+                卖出英雄 i + 1, j + 1
+            End If
+
+            // 下面是对于情况的判断,,,,投手,,,水滴,战士,爆破手,牛头,演奏,企鹅  不卖
+		        //需要卖出的英雄
+            If 位置英雄 = "战士" Then 
+                If 是否存在战士 > 0 Then 
+                	
+                    Traceprint "卖出"& 位置英雄
+                    卖出英雄 i + 1, j + 1
+                Else 
+                    是否存在战士 = 是否存在战士 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "爆破手" Then 
+                If 是否存在爆破手 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在爆破手 = 是否存在爆破手 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "水滴" Then 
+                If 是否存在水滴 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在水滴 = 是否存在水滴 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "牛头" Then 
+                If 是否存在牛头 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在牛头 = 是否存在牛头 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "投手" Then 
+                If 是否存在投手 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在投手 = 是否存在投手 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "火枪手" Then 
+                Traceprint "副本"& 位置英雄
+                If 副本火枪数 > 1 Then 
+                    卖出英雄 i + 1, j + 1
+                Else 
+                    获取坐标 i + 1, j + 1, "副本"
+                    副本火枪数 = 副本火枪数 + 1
+                End If
+            End If
+            
+            If 位置英雄 = "企鹅" Then 
+                If 是否存在企鹅 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在企鹅 = 是否存在企鹅 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "琴女" Then 
+                If 是否存在琴女 > 0 Then 
+                    卖出英雄 i + 1, j + 1
+                    Traceprint "卖出"& 位置英雄
+                Else 
+                    是否存在琴女 = 是否存在琴女 + 1 
+                End If
+            End If
+            
+            If 位置英雄 = "大天使" Then 
+            	
+                战力值 = 战力值 + 1
+			
+                For k = 0 To 5
+                    If 战场占位(6 + k) <> "大天使" Then 
+                        If j > k or i<>1 Then 
+				   	
+				   
+                            移动棋子(i+1,j+1,2,k+1)  // 将天使放在第二排的空位
+                        End If
+                            
+                            
+                        Exit For
+                    End If
+                Next
+                
+            End If
+            If 位置英雄 = "恶霸"  Then 
+            	
+                战力值 = 战力值 + 1
+
+                For k = 0 To 5
+                    If k <> 1 And 战场占位(k) <> "恶霸" Then 
+                        If j > k or i<>0 Then 
+                            移动棋子(i+1,j+1,1,k+1)  // 将恶霸放在第一排的空位
+                        End If
+                        Exit For
+                        
+                    End If
+                Next
+
+                
+            End If
+            
+            If 位置英雄 = "三角"  Then 
+                If i = 0 and j = 1 Then 
+                Else 
+                    If 战场占位(1) <> "三角" Then 
+                        Traceprint "移动三角" 
+                        移动棋子(i+1,j+1,1,2)  // 将三角放在第一排的第二个位
+                        Exit For
+                    Else 
+                    	// 已经有一组三角就卖了
+                        Traceprint "卖出三角" 
+                        卖出英雄(i+1,j+1)
+                    End If
+                End If
+
+
+            End If
+            
+            If 位置英雄 = "猎手"  Then 
+                If i = 2 and j = 0 Then 
+                Else 
+                    If 战场占位(12) <> "猎手" Then 
+                        Traceprint "移动猎手" 
+                        移动棋子(i+1,j+1,3,1)  // 将三角放在第一排的第二个位
+                        Exit For
+                    Else 
+                    	// 已经有一组三角就卖了
+                        Traceprint "卖出猎手" 
+                        卖出英雄(i+1,j+1)
+                    End If
+                End If
+
+            End If
+       
+            If 位置英雄 = "魔龙" Then 
+                战力值 = 战力值 + 0.35
+                If 副本火枪数 > 1 Then 
+                    If i = 2 Then 
+                    Else 
+                        For k = 1 To 5
+                            If k<>0 And 战场占位(12 + k) <> "魔龙" Then 
+                                移动棋子(i+1,j+1,3,k+1)  // 将魔龙放在第三排的空位
+                                Exit For
+                            End If
+                        Next
+                    End If
+                Else 
+                    获取坐标 i + 1, j + 1, "神话副本"
+                    副本火枪数 = 副本火枪数 + 1
+                End If
+                
+
+               
+            End If
+        
+            //小天使登神
+            If 位置英雄 = "小天使" Then 
+                Traceprint "小天使飞升" 
+                获取坐标(i+1,j+1,"登神")
+            End If
+
+        Next
+    Next
+    
+    If 是否存在牛头>0 Then 
+	  //需要召唤得到基本英雄
+        祈愿模式 = 1
+    Else 
+        祈愿模式 = 0
+    End If
+    //总结下一步应该做什么
+    Traceprint "战力值" &战力值
+    If 战力值 >= 2 Then 
+	      //就可以只强化了
+        现在应该干什么 = "强化"
+        Exit Function
+    End If
+
+    If 是否存在战士>0 And 是否存在爆破手 > 0 Then 
+	      //需要祈愿直到出现天使
+        现在应该干什么 = "祈愿"
+        Exit Function
+    End If
+
+    If 是否存在战士=0 or 是否存在爆破手 = 0 Then 
+	      //需要召唤得到基本英雄
+        现在应该干什么 = "召唤"
+        Exit Function
+    End If
+    
+
+
+End Function
+
+
+Dim 颜色数量
+Function 基本召唤(x)
+    颜色数量 = GetColorNum(1330,5,1457,132,"3C49A7",1.0)
+    If 颜色数量 > 900 Then 
+        Tap 1386, 60
+        Delay 1000
+        
+    End If
+    //基本召唤
+    For i=0  To x
+        Tap 1678, 535
+        Delay 200
+    Next	
+End Function
+
+
+
+Function 祈愿操作()
+
+    // 关闭一切打开页面
+    颜色数量 = GetColorNum(1330,5,1457,132,"3C49A7",1.0)
+    If 颜色数量 > 900 Then 
+        Tap 1386, 60
+        Delay 1000
+        Tap 1386, 60
+        Delay 1000
+    End If
+
+
+    FindPic 1613,32,1845,277,"/sdcard/Pictures/祈愿.png","000000",0,0.8,intX,intY
+    If intX > -1 And intY > -1 Then 
+        Traceprint "打开祈愿"
+        Tap intX,intY
+    End If
+    Delay 1000
+    颜色数量 = GetColorNum(1330,5,1457,132,"3C49A7",1.0)
+    If 颜色数量 > 900 Then 
+        Traceprint "点击抽奖20次"
+        Dim 退出循环,识别文字
+        退出循环 = 0
+        While 退出循环 = 0
+            FindColor 1760,471,1822,534,"0D00BC",0,1.0,intX,intY
+            If intX >-1 then
+                Traceprint "没钱了"
+                退出循环 = 1
+            End If
+        
+            If 当前关卡数 > 0 Then 
+                //Tap 1648, 539
+                If 祈愿模式 = 1 Then 
+                    Tap 1648, 539
+                    Delay 50
+                Else 
+                    Tap 1650,242
+                    Delay 50
+                    Tap 1648, 539
+                    Delay 50
+                End If
+
+                UseDict (2)
+                识别文字=Ocr(895,355,1020,721,"F1FEFF",0.9)
+                Traceprint 识别文字
+                If 识别文字 = "满员" Then 
+                    退出循环=1
+                End If
+            End If
+
+        Wend  
+    End If
+    
+End Function
+
+
+Function 强化()
+
+
+    Tap 1875,536
+    Delay 500
+    //关闭按钮是否存在
+    颜色数量 = GetColorNum(1330,5,1457,132,"3C49A7",1.0)
+    If 颜色数量 > 900 Then 
+    	
+        Dim 继续点击 = 0
+        While 继续点击 = 0
+            Tap 1750,418
+            Delay 200
+            Dim IntX,IntY
+            FindColor 1729,352,1778,414,"0D00BC",0,1.0,intX,intY
+            If intX >-1 then
+                Traceprint "没钱了"
+                继续点击 = 1
+                Delay 15000
+                
+            End If
+            //关闭按钮是否存在
+            颜色数量 = GetColorNum(1330,5,1457,132,"3C49A7",1.0)
+            If 颜色数量 < 900 Then 
+                继续点击 = 1
+            End If
+        Wend
+    End If
+	
+End Function
+
+
+While 1
+    Delay 1000
+    当前关卡数=Thread.GetShareVar("当前关卡数")
+    Traceprint "当前关卡 "&当前关卡数
+    
+    If 当前关卡数 <> null and 当前关卡数 >0 and  当前关卡数 <2 Then 
+        战场占位 = Array("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        副本火枪数 = 0
+    End If
+    
+    If 当前关卡数 <> null and 当前关卡数 > 2 Then 
+        If 当前关卡数 = 3 Then 
+            基本召唤(10)
+        End If
+	
+	
+        Dim 下一步操作
+
+        遍历战场 ()
+        下一步操作 = 现在应该干什么()
+
+        Traceprint "下一步操作 "&下一步操作
+	
+        If 下一步操作 = "召唤" Then 
+            基本召唤 (5)
+        ElseIf 下一步操作 = "祈愿" Then
+            祈愿操作 
+        ElseIf 下一步操作 = "强化" Then
+            强化()
+        End If
+        Tap 656,21
+    End If
+    
+Wend
+
+
+
